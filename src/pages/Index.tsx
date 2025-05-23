@@ -23,13 +23,15 @@ const Index = () => {
   const [energyCommodities, setEnergyCommodities] = useState<Commodity[]>([]);
   const [apiKey, setApiKey] = useState('R0F7Sq/LDiUtde4fBfSzOg==eKJVDeuW0tm0BsCO');
 
+  // Only commodities available in free tier
   const metals = [
     'gold', 'silver', 'platinum', 'copper', 'palladium', 
-    'uranium', 'iron', 'lithium', 'aluminium', 'zinc', 'cobalt', 'lead'
+    'aluminum', 'zinc', 'lead', 'nickel', 'tin'
   ];
   
+  // Free tier energy commodities (limited options)
   const energySources = [
-    'crude_oil', 'natural_gas', 'rbob_gasoline', 'heating_oil', 'brent_crude_oil'
+    'wti_crude', 'gasoline'
   ];
 
   useEffect(() => {
@@ -38,60 +40,71 @@ const Index = () => {
         setLoading(true);
         
         // Fetch metal commodities
-        const metalData = await Promise.all(
-          metals.map(async (name) => {
-            try {
-              const data = await fetchCommodityPrice(name, apiKey);
-              return {
-                name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
-                price: data.price,
-                // Simulate other values for UI demonstration
-                change: parseFloat((Math.random() * 10 - 5).toFixed(2)),
-                changePercent: parseFloat((Math.random() * 5 - 2.5).toFixed(2)),
-                open: parseFloat((data.price * (1 - Math.random() * 0.05)).toFixed(2)),
-                high: parseFloat((data.price * (1 + Math.random() * 0.05)).toFixed(2)),
-                low: parseFloat((data.price * (1 - Math.random() * 0.07)).toFixed(2)),
-                prev: parseFloat((data.price * (1 - Math.random() * 0.03 + 0.01)).toFixed(2))
-              };
-            } catch (error) {
-              console.error(`Error fetching ${name}:`, error);
-              return {
-                name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
-                price: 0
-              };
-            }
-          })
-        );
+        const metalPromises = metals.map(async (name) => {
+          try {
+            const data = await fetchCommodityPrice(name, apiKey);
+            return {
+              name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
+              price: data.price,
+              // Simulate other values for UI demonstration
+              change: parseFloat((Math.random() * 10 - 5).toFixed(2)),
+              changePercent: parseFloat((Math.random() * 5 - 2.5).toFixed(2)),
+              open: parseFloat((data.price * (1 - Math.random() * 0.05)).toFixed(2)),
+              high: parseFloat((data.price * (1 + Math.random() * 0.05)).toFixed(2)),
+              low: parseFloat((data.price * (1 - Math.random() * 0.07)).toFixed(2)),
+              prev: parseFloat((data.price * (1 - Math.random() * 0.03 + 0.01)).toFixed(2))
+            };
+          } catch (error) {
+            console.error(`Error fetching ${name}:`, error);
+            return {
+              name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
+              price: 0,
+              change: 0,
+              changePercent: 0,
+              open: 0,
+              high: 0,
+              low: 0,
+              prev: 0
+            };
+          }
+        });
         
+        const metalData = await Promise.all(metalPromises);
         setMetalCommodities(metalData);
         
         // Fetch energy commodities
-        const energyData = await Promise.all(
-          energySources.map(async (name) => {
-            try {
-              const data = await fetchCommodityPrice(name, apiKey);
-              return {
-                name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
-                price: data.price,
-                // Simulate other values for UI demonstration
-                change: parseFloat((Math.random() * 10 - 5).toFixed(2)),
-                changePercent: parseFloat((Math.random() * 5 - 2.5).toFixed(2)),
-                open: parseFloat((data.price * (1 - Math.random() * 0.05)).toFixed(2)),
-                high: parseFloat((data.price * (1 + Math.random() * 0.05)).toFixed(2)),
-                low: parseFloat((data.price * (1 - Math.random() * 0.07)).toFixed(2)),
-                prev: parseFloat((data.price * (1 - Math.random() * 0.03 + 0.01)).toFixed(2))
-              };
-            } catch (error) {
-              console.error(`Error fetching ${name}:`, error);
-              return {
-                name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
-                price: 0
-              };
-            }
-          })
-        );
+        const energyPromises = energySources.map(async (name) => {
+          try {
+            const data = await fetchCommodityPrice(name, apiKey);
+            return {
+              name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
+              price: data.price,
+              // Simulate other values for UI demonstration
+              change: parseFloat((Math.random() * 10 - 5).toFixed(2)),
+              changePercent: parseFloat((Math.random() * 5 - 2.5).toFixed(2)),
+              open: parseFloat((data.price * (1 - Math.random() * 0.05)).toFixed(2)),
+              high: parseFloat((data.price * (1 + Math.random() * 0.05)).toFixed(2)),
+              low: parseFloat((data.price * (1 - Math.random() * 0.07)).toFixed(2)),
+              prev: parseFloat((data.price * (1 - Math.random() * 0.03 + 0.01)).toFixed(2))
+            };
+          } catch (error) {
+            console.error(`Error fetching ${name}:`, error);
+            return {
+              name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
+              price: 0,
+              change: 0,
+              changePercent: 0,
+              open: 0,
+              high: 0,
+              low: 0,
+              prev: 0
+            };
+          }
+        });
         
+        const energyData = await Promise.all(energyPromises);
         setEnergyCommodities(energyData);
+        
       } catch (error) {
         console.error('Failed to fetch commodity data:', error);
         toast.error('Failed to fetch commodity data. Please try again later.');

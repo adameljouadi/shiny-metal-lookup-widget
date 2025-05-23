@@ -15,7 +15,9 @@ export const fetchCommodityPrice = async (name: string, apiKey: string): Promise
     });
     
     if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+      const errorData = await response.json();
+      console.error(`API request failed for ${name}:`, errorData);
+      throw new Error(`API request failed with status ${response.status}: ${errorData.error || 'Unknown error'}`);
     }
     
     const data = await response.json();
